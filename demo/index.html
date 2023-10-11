@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArowJS</title>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script type="module">
+        import { Arow } from '../core/index.js'
+
+        const App = Arow(
+            {
+                view: (props, ...children) => {
+                    return div(
+                        { style: 'display: flex' },
+                        "Welcome to ArowJS!",
+                        counter({
+                            count: 0
+                        })
+                    )
+                }
+            }
+        );
+    </script>
+</body>
+
+</html>

@@ -2,29 +2,82 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ArowJS</title>
 </head>
 
 <body>
     <div id="app"></div>
     <script type="module">
-        import { Arow } from '../core/index.js'
+        import { Arow } from '../core/index.js';
+
+        const counter = Arow(
+            {
+                view: (props, ...children) => {
+
+                    this.controller.setCount(props.count);
+
+                    return div(
+                        {},
+                        div({}, this.state.count),
+                        button(
+                            { $click: () => this.controller.setCount(this.state.count + 1) },
+                            '+1'
+                        )
+                    )
+                },
+                controller: {
+                    setCount(count) {
+                        if (typeof count === undefined) {
+                            if (getCountFromStore()) {
+                                count = getCountFromStore();
+                            }
+                            this.state.count = count;
+                            setCountToStore(count);
+                        }
+                    }
+                },
+                model: {
+                    setCountToStore(count) {
+                        localStorage.setItem('count', count);
+                    },
+                    getCountFromStore() {
+                        return localStorage.getItem('count');
+                    }
+                },
+                state: {}
+            }
+        )
 
         const App = Arow(
             {
                 view: (props, ...children) => {
                     return div(
-                        { style: 'display: flex' },
+                        { style: 'display: flex; flex-direction: column; align-items: center' },
                         "Welcome to ArowJS!",
                         counter({
-                            count: 0
+                            count: props.count
                         })
                     )
+                },
+                controller: {
+
+                },
+                model: {
+
+                },
+                state: {
+
                 }
             }
         );
+
+        App(
+            {
+                count: 0
+            }
+        ).mount(document.getElementById('app'))
     </script>
 </body>
 

@@ -1,5 +1,13 @@
 export function Arow(componentObject) {
-    return {
-        name: 'Arow'
-    }
+    /**
+     * {
+     *  view : () => {}
+     *  _view : view(props)
+     *  state : Proxy => _view
+     *  renderToken : uuid <=> VDOM Dispatcher
+     *  requestRender : () => {} 
+     * ...
+     * }
+     */
 }
+

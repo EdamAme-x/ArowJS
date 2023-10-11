@@ -1,3 +1,5 @@
+// globalThis["div & etc..."] = (attrs, ...children) => {}
+
 export function Arow(componentObject) {
     /**
      * {

@@ -50,7 +50,7 @@ for (let i = 0; i < Tags.length; i++) {
  * @return {string} The generated UUID.
  */
 function createUUID() {
-    return 'aw-xxxxxx'.replace("x", function (c) {
+    return 'aw-xxxxxx'.replace(/x/g, function (c) {
         var r = Math.random() * 16 | 0, v = r;
         return v.toString(16);
     });
@@ -62,57 +62,47 @@ function createUUID() {
  * @param {Object} componentObject - The component object.
  * @return {Object} The generated mount object.
  */
-export function Arow(componentObject) {
-    /**
-     * {
-     *  view : () => {}
-     *  _view : view(props)
-     *  state : Proxy => _view
-     *  renderToken : uuid <=> VDOM Dispatcher
-     *  requestRender : () => {} 
-     * ...
-     * }
-     */
 
+globalThis.ArowDOM = {
+    DOM: null,
+    initlize: function (el) {
+        
+    }
+};
+
+export function Arow(componentObject) {
     const mountObject = {
         ...componentObject,
         _view: null,
         renderToken: "",
-        /**
-         * Request render function.
-         *
-         * @param {Object} props - The props object.
-         * @return {string} The uuid of the render token.
-         */
+        props: {},
         requestRender: function (props) {
             const uuid = createUUID();
+            this.props = props;
             this.renderToken = uuid;
-            this._view = this.view(props);
-            return uuid;
+            this._view = this.view(this.props);
+            this.changeDOM();
         },
-        /**
-         * Mounts the element and renders the component with the provided props.
-         *
-         * @param {HTMLElement} element - The element to mount the component to.
-         * @param {Object} props - The props to pass to the component.
-         * @return {HTMLElement} - The mounted element.
-         */
         mount: function (element, props) {
+            this.element = element;
             this.requestRender(props);
-            element.appendChild(this._view);
-            return element;
+            globalThis.ArowDOM.initlize(element);
+            globalThis.ArowDOM.DOM = this._view;
+            this.isMount = true;
+            // VDOM patch
         },
-        /**
-         * Patches the component with the given properties.
-         *
-         * @param {Object} props - The properties to patch the component with.
-         * @return {Object} - The updated view of the component.
-         */
+        changeDOM: function () {
+            if (this.isMount) {
+                return;
+            }
+            globalThis.ArowDOM.DOM = this._view;
+        },
         patch: function (props) {
             this.requestRender(props);
             return this._view;
-        }
-    }
+        },
+        isMount: false
+    };
 
     return mountObject;
 }

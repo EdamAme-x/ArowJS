@@ -28,6 +28,8 @@
                         button(
                             { $click: () => {
                                 this.controller.setCount.call(this, this.state.count + 1)
+                                this.requestRender(props)
+                                console.log(this)
                             } },
                             '+1'
                         )

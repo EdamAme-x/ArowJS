@@ -14,70 +14,62 @@
 
         const counter = Arow(
             {
-                view: (props, ...children) => {
+                view: function (props, ...children) {
+                    if (!this.state.initlized) {
+                        this.controller.setCount.call(this, props.count);
 
-                    this.controller.setCount(props.count);
+                        this.state.initlized = true;
+                    }
 
                     return div(
                         {},
-                        div({}, this.state.count),
+                        div({}, "count: ", this.state.count),
                         button(
                             { $click: () => this.controller.setCount(this.state.count + 1) },
                             '+1'
                         )
-                    )
+                    );
                 },
                 controller: {
-                    setCount(count) {
-                        if (typeof count === undefined) {
-                            if (getCountFromStore()) {
-                                count = getCountFromStore();
-                            }
-                            this.state.count = count;
-                            setCountToStore(count);
-                        }
+                    setCount: function (count) {
+                        count = this.model.getCountFromStore();
+                        this.state.count = count;
+                        this.model.setCountToStore(count);
                     }
                 },
                 model: {
-                    setCountToStore(count) {
+                    setCountToStore: function (count) {
                         localStorage.setItem('count', count);
                     },
-                    getCountFromStore() {
-                        return localStorage.getItem('count');
+                    getCountFromStore: function () {
+                        return parseInt(localStorage.getItem('count')) || 0;
                     }
                 },
-                state: {}
-            }
-        )
-
-        const App = Arow(
-            {
-                view: (props, ...children) => {
-                    return div(
-                        { style: 'display: flex; flex-direction: column; align-items: center' },
-                        "Welcome to ArowJS!",
-                        counter({
-                            count: props.count
-                        })
-                    )
-                },
-                controller: {
-
-                },
-                model: {
-
-                },
                 state: {
-
+                    initlized: false
                 }
             }
         );
 
-        App(
+        const App = Arow(
             {
-                count: 0
+                view: function (props, ...children) {
+                    return div(
+                        { style: 'display: flex; flex-direction: column; align-items: center' },
+                        "Welcome to ArowJS!",
+                        counter.patch({
+                            count: props.count
+                        })
+                    );
+                },
+                controller: {},
+                model: {},
+                state: {}
             }
-        ).mount(document.getElementById('app'))
+        );
+
+
+        App.mount(document.getElementById('app'), { count: 0 });
     </script>
 </body>
 

@@ -33,7 +33,7 @@ for (let i = 0; i < Tags.length; i++) {
         }
 
         for (let j = 0; j < children.length; j++) {
-            if (typeof children[j].toString() === 'string') {
+            if (typeof children[j] === 'string' || typeof children[j] === 'number' || typeof children[j] === 'boolean' || typeof children[j] === 'undefined' || children[j] === null) {
                 el.appendChild(document.createTextNode(children[j]));
             }
             else {
@@ -109,8 +109,7 @@ export function Arow(componentObject) {
          * @return {Object} - The updated view of the component.
          */
         patch: function (props) {
-            const uuid = this.requestRender(props);
-            this.renderToken = uuid;
+            this.requestRender(props);
             return this._view;
         }
     }

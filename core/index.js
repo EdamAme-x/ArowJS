@@ -1,4 +1,53 @@
-// globalThis["div & etc..."] = (attrs, ...children) => {}
+globalThis.ArowDOM = {
+    DOM: document.createElement('div'),
+    _DOM: document.createElement('div'),
+    initlize: function (el) {
+        while (el.firstChild) {
+            el.removeChild(el.firstChild);
+        }
+        el.appendChild(this._DOM);
+    }
+};
+
+export function Arow(componentObject) {
+    const mountObject = {
+        ...componentObject,
+        _view: null,
+        renderToken: "",
+        props: {},
+        requestRender: function (props) {
+            const uuid = createUUID();
+            this.props = props;
+            this.renderToken = uuid;
+            this._view = this.view(this.props);
+            this.changeDOM();
+        },
+        mount: function (element, props) {
+            this.element = element;
+            globalThis.ArowDOM.initlize(element);
+            globalThis.ArowDOM.DOM = this._view;
+            this.isMount = true;
+            this.requestRender(props);
+        },
+        changeDOM: function () {
+            if (this.isMount) {
+                const patches = diff(globalThis.ArowDOM._DOM, this._view);
+                applyPatches(globalThis.ArowDOM._DOM, patches);
+            }
+            globalThis.ArowDOM.DOM = this._view;
+        },
+        patch: function (props) {
+            this.requestRender(props);
+            const patches = diff(globalThis.ArowDOM._DOM, this._view);
+            applyPatches(globalThis.ArowDOM._DOM, patches);
+            return this._view;
+        },
+        isMount: false
+    };
+
+    return mountObject;
+}
+
 const Tags = [
     "a", "abbr", "address", "area", "article", "aside", "audio", "b", "base", "bdi", "bdo", "blockquote",
     "body", "br", "button", "canvas", "caption", "cite", "code", "col", "colgroup", "data", "datalist", "dd",
@@ -21,9 +70,7 @@ for (let i = 0; i < Tags.length; i++) {
 
         if (attrs) {
             for (const key in attrs) {
-                // $click ~ .addEventListener
-
-                if (key.split('')[0] === '$') {
+                if (key[0] === '$') {
                     el.addEventListener(key.slice(1), attrs[key]);
                     continue;
                 }
@@ -35,8 +82,7 @@ for (let i = 0; i < Tags.length; i++) {
         for (let j = 0; j < children.length; j++) {
             if (typeof children[j] === 'string' || typeof children[j] === 'number' || typeof children[j] === 'boolean' || typeof children[j] === 'undefined' || children[j] === null) {
                 el.appendChild(document.createTextNode(children[j]));
-            }
-            else {
+            } else {
                 el.appendChild(children[j]);
             }
         }
@@ -44,11 +90,6 @@ for (let i = 0; i < Tags.length; i++) {
     };
 }
 
-/**
- * Generates a universally unique identifier (UUID) in the format 'aw-xxxxxx'.
- *
- * @return {string} The generated UUID.
- */
 function createUUID() {
     return 'aw-xxxxxx'.replace(/x/g, function (c) {
         var r = Math.random() * 16 | 0, v = r;
@@ -56,54 +97,19 @@ function createUUID() {
     });
 }
 
-/**
- * Generates a mount object for a component.
- *
- * @param {Object} componentObject - The component object.
- * @return {Object} The generated mount object.
- */
-
-globalThis.ArowDOM = {
-    DOM: null,
-    initlize: function (el) {
-        
-    }
-};
-
-export function Arow(componentObject) {
-    const mountObject = {
-        ...componentObject,
-        _view: null,
-        renderToken: "",
-        props: {},
-        requestRender: function (props) {
-            const uuid = createUUID();
-            this.props = props;
-            this.renderToken = uuid;
-            this._view = this.view(this.props);
-            this.changeDOM();
-        },
-        mount: function (element, props) {
-            this.element = element;
-            this.requestRender(props);
-            globalThis.ArowDOM.initlize(element);
-            globalThis.ArowDOM.DOM = this._view;
-            this.isMount = true;
-            // VDOM patch
-        },
-        changeDOM: function () {
-            if (this.isMount) {
-                return;
-            }
-            globalThis.ArowDOM.DOM = this._view;
-        },
-        patch: function (props) {
-            this.requestRender(props);
-            return this._view;
-        },
-        isMount: false
-    };
-
-    return mountObject;
+function diff(target, newDOM) {
+    const patches = [];
+    return patches;
 }
 
+function applyPatches(target, patches) {
+    for (const patch of patches) {
+        if (patch.type === 'replace') {
+            target.parentNode.replaceChild(patch.node, target);
+        } else if (patch.type === 'props') {
+            for (const key in patch.props) {
+                target[key] = patch.props[key];
+            }
+        }
+    }
+}
